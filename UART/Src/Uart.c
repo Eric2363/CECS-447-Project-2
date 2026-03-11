@@ -1,6 +1,8 @@
 #include "tm4c123gh6pm.h"
 #include "UART.h"
 
+
+
 void UART_Init(bool RxInt, bool TxInt){
   SYSCTL_RCGC1_R |= SYSCTL_RCGC1_UART0; // activate UART0
   SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA; // activate port A
@@ -159,4 +161,5 @@ char character;
   }
   *bufPt = 0; // adding null terminator to the end of the string.
 }
+
 
