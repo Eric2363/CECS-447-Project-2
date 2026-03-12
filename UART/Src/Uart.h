@@ -1,6 +1,3 @@
-#ifndef UART_H
-#define UART_H
-
 #include <stdint.h>
 #include <stdbool.h>  // for C boolean data type
 
@@ -55,5 +52,3 @@ bool UART_Available(void);
 
 // ISR
 void UART0_Handler(void);
-
-#endif
