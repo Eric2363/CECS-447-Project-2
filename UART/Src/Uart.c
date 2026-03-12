@@ -25,7 +25,7 @@ bool rb_empty(const RingBuffer *rb){
 }
 
 bool rb_full(const RingBuffer *rb){
-  return ((rb->head + 1) % RB_SIZE) == rb->tail;
+  return (uint16_t)((rb->head + 1) % RB_SIZE) == rb->tail;
 }
 
 bool rb_put(RingBuffer *rb, uint8_t byte){
