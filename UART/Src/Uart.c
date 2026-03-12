@@ -9,26 +9,26 @@ typedef struct{
   volatile uint8_t data[RB_SIZE];
 } RingBuffer;
 
-static RingBuffer RxRB;
-static bool RxInterruptEnabled = false;
+ RingBuffer RxRB;
+ bool RxInterruptEnabled = false;
 
 // =====================
 // Ring Buffer Helpers
 // =====================
-static void rb_Init(RingBuffer *rb){
+void rb_Init(RingBuffer *rb){
   rb->head = 0;
   rb->tail = 0;
 }
 
-static bool rb_empty(const RingBuffer *rb){
+bool rb_empty(const RingBuffer *rb){
   return (rb->head == rb->tail);
 }
 
-static bool rb_full(const RingBuffer *rb){
+bool rb_full(const RingBuffer *rb){
   return ((rb->head + 1) % RB_SIZE) == rb->tail;
 }
 
-static bool rb_put(RingBuffer *rb, uint8_t byte){
+bool rb_put(RingBuffer *rb, uint8_t byte){
   uint16_t next = (rb->head + 1) % RB_SIZE;
 
   if(next == rb->tail){
@@ -40,7 +40,7 @@ static bool rb_put(RingBuffer *rb, uint8_t byte){
   return true;
 }
 
-static bool rb_get(RingBuffer *rb, uint8_t *byte){
+bool rb_get(RingBuffer *rb, uint8_t *byte){
   if(rb_empty(rb)){
     return false;
   }
@@ -245,4 +245,5 @@ void UART_InString(uint8_t *bufPt, uint16_t max){
     character = UART_InChar();
   }
   *bufPt = 0; // null terminator
+
 }
