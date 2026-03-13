@@ -1,92 +1,97 @@
-//#include "tm4c123gh6pm.h"
-//#include "PLL.h"
-//#include "Uart.h"
-//#include "PortF.h"
+#include "tm4c123gh6pm.h"
+#include "PLL.h"
+#include "Uart.h"
+#include "PortF.h"
+#include "stdint.h"
+#include "stdbool.h"
 
-//void SystemInit(void);
-//void printMenu(void);
+void SystemInit(void);
+void printMenu(void);
+void DelayMs(uint32_t ms);
 
-//typedef enum states{
-//	MainMenu,
-//	Mode1,
-//	Mode2,
-//	Mode3
-//} state;
+typedef enum states{
+	MainMenu,
+	Mode1,
+	Mode2,
+	Mode3
+} state;
 
-//state State = MainMenu;
+state State = MainMenu;
 
-//int main(){
+volatile bool red;
+volatile bool blue;
+volatile bool green;
 
-//	SystemInit();
 
-//	UART_OutString((uint8_t*)COLOR_RESET);
+int main(){
 
-//	printMenu();
+	SystemInit();
 
-//	while(1){
+	UART_OutString((uint8_t*)COLOR_RESET);
 
-//		char c = UART_InChar();   // read one char from ring buffer
+	printMenu();
 
-//		if(State == MainMenu){
 
-//			if(c == '1'){
-//				State = Mode1;
-//				UART_OutString((uint8_t*)"\n\rMode 1 selected\n\r");
-//			}
 
-//			else if(c == '2'){
-//				State = Mode2;
-//				UART_OutString((uint8_t*)"\n\rMode 2 selected\n\r");
-//			}
+	
+	while(1){
 
-//			else if(c == '3'){
-//				State = Mode3;
-//				UART_OutString((uint8_t*)"\n\rMode 3 selected\n\r");
-//			}
-//		}
+if(red){
+    PortF_SetDuty(1,100);
+}
+else if(blue){
+    PortF_SetDuty(2,50);
+}
+else if(green){
+    PortF_SetDuty(3,10);
+}
+else{
+    PortF_SetDuty(1,0); // or turn all off however you prefer
+}
+		
+	}
+}
 
-//		if(State == Mode1){
+void SystemInit(){
 
-//			if(c == 'b' || c == 'B'){
-//				GPIO_PORTF_DATA_R &= ~LEDS;
-//				GPIO_PORTF_DATA_R |= BLUE;
-//				UART_OutString((uint8_t*)COLOR_BLUE);
-//				UART_OutChar(c);
-//			}
+	PLL_Init();
+	UART_Init(true,false);
+	PortF_Init();
+}
 
-//			if(c == 'r' || c == 'R'){
-//				GPIO_PORTF_DATA_R &= ~LEDS;
-//				GPIO_PORTF_DATA_R |= RED;
-//				UART_OutString((uint8_t*)COLOR_RED);
-//			}
+void printMenu(){
 
-//			if(c == 'g' || c == 'G'){
-//				GPIO_PORTF_DATA_R &= ~LEDS;
-//				GPIO_PORTF_DATA_R |= GREEN;
-//				UART_OutString((uint8_t*)COLOR_GREEN);
-//			}
+	UART_OutString((uint8_t*)"Welcome to CECS 447 Project 2\n\r");
+	UART_OutString((uint8_t*)"1 - LED Control\n\r");
+	UART_OutString((uint8_t*)"2 - Color Wheel\n\r");
+	UART_OutString((uint8_t*)"3 - Chat Room\n\r");
+	UART_OutString((uint8_t*)"Choose mode: ");
+}
 
-//			if(c == 'w' || c == 'W'){
-//				GPIO_PORTF_DATA_R &= ~LEDS;
-//				GPIO_PORTF_DATA_R |= LEDS;
-//				UART_OutString((uint8_t*)COLOR_WHITE);
-//			}
-//		}
-//	}
-//}
+void DelayMs(uint32_t ms){
+    volatile uint32_t count;
+    
+    while(ms--){
+        count = 12500;   // ~1ms at 50MHz
+        while(count--){
+        }
+    }
+}
+void GPIOPortF_Handler(void)
+{
+    uint32_t status = GPIO_PORTF_MIS_R; // latch cause
+    GPIO_PORTF_ICR_R = status;          // clear flags
 
-//void SystemInit(){
+    if(status & SW1){
+        red = !red;
+    }
+    if(status & SW2){
+        green = !green;
+    }
+}
 
-//	PLL_Init();
-//	UART_Init(true,false);
-//	PortF_Init();
-//}
-
-//void printMenu(){
-
-//	UART_OutString((uint8_t*)"Welcome to CECS 447 Project 2\n\r");
-//	UART_OutString((uint8_t*)"1 - LED Control\n\r");
-//	UART_OutString((uint8_t*)"2 - Color Wheel\n\r");
-//	UART_OutString((uint8_t*)"3 - Chat Room\n\r");
-//	UART_OutString((uint8_t*)"Choose mode: ");
-//}
+// optional alias if your startup expects GPIOF_Handler instead:
+void GPIOF_Handler(void)
+{
+    GPIOPortF_Handler();
+}

@@ -10,7 +10,7 @@ typedef struct{
 } RingBuffer;
 
  RingBuffer RxRB;
- bool RxInterruptEnabled = false;
+ bool RxInterruptEnabled = true;
 
 // =====================
 // Ring Buffer Helpers
@@ -103,6 +103,7 @@ void UART0_Handler(void){
       rb_put(&RxRB, ch);
     }
     UART0_ICR_R = UART_ICR_RXIC; // clear RX interrupt
+		
   }
 
   // TX interrupt
