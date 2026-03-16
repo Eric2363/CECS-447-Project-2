@@ -16,6 +16,8 @@ bool ColorWheelSelected = false;
 volatile uint8_t WheelColor = 0;
 
 volatile bool SENDCOLOR = false;
+volatile bool Mode2JustEntered = false;
+volatile bool UpdateColorDisplay = false;
 
 //function prototypes
 void SystemInit(void);
@@ -138,121 +140,84 @@ int main(void){
 					}
 				break;
 				case Mode2:
-				UART0_OutCRLF();
-				UART0_OutString((uint8_t*)"Mode 2 MCU1: Press ^ to exit this mode\r\n");
-				UART0_OutString((uint8_t*)"In color Wheel State\r\n");
-				UART0_OutString((uint8_t*)"Please press sw2 to go through the colors in\r\n");
-				UART0_OutString((uint8_t*)"the following color wheel: Dark, Red, Green, Blue, Yellow, Cyan, Purple, White.\r\n");
-				UART0_OutCRLF();
-				UART0_OutString((uint8_t*)"Once a color is selected, press sw1 to send the color to MCU2.\r\n");
-				
-				UART0_OutString((uint8_t*)"Current Color:");
-				if(WheelColor == 0){
-						
-						UART0_OutString((uint8_t*)"Dark\r\n");
-					}
-					else if (WheelColor == 1){
-						
-						UART0_OutString((uint8_t*)"Red\r\n");
-					}
-					else if (WheelColor == 2){
-					
-						UART0_OutString((uint8_t*)"Green\r\n");
-					}
-					else if (WheelColor == 3){
-						
-						UART0_OutString((uint8_t*)"Blue\r\n");
-					}
-					else if (WheelColor == 4){
-						
-						UART0_OutString((uint8_t*)"Yellow\r\n");
-					}
-					else if (WheelColor == 5){
-						
-						UART0_OutString((uint8_t*)"Cyan\r\n");
-					}
-					else if (WheelColor == 6){
-						
-						UART0_OutString((uint8_t*)"Purple\r\n");
-					}
-					else if (WheelColor == 7){
-					
-						UART0_OutString((uint8_t*)"White\r\n");
-					}
-					
-				CurrentState = Mode2_SelectColor;
-			
-				
-				break;
+
+					UART0_OutCRLF();
+					UART0_OutString((uint8_t*)"Mode 2 MCU1: press ^ to exit this mode\r\n");
+					UART0_OutString((uint8_t*)"In color Wheel State.\r\n");
+					UART0_OutString((uint8_t*)"Please press sw2 to go through the colors in\r\n");
+					UART0_OutString((uint8_t*)"the following color wheel: Dark, Red, Green,\r\n");
+					UART0_OutString((uint8_t*)"Blue, Yellow, Cyan, Purple, White.\r\n");
+					UART0_OutString((uint8_t*)"Once a color is selected, press sw1 to send\r\n");
+					UART0_OutString((uint8_t*)"the color to MCU2.\r\n");
+
+					UART0_OutString((uint8_t*)"Current color: Dark\r\n");
+
+					UART4_OutChar('2'); // tell mcu 2 to be in mode 2
+					WheelColor = 0;
+					Mode2JustEntered = true;
+					UpdateColorDisplay = false;
+					CurrentState = Mode2_SelectColor;
+					break;
+
 				
 					//check if sw1 is pressed and sends data to mcu, also handles color on mcu in round robin
-				case Mode2_SelectColor:
-					
-				if(WheelColor == 0){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('d');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(0,0,0);
-				}
-				else if (WheelColor == 1){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('r');
-						//CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(100,0,0);
-				}
-				else if(WheelColor ==2){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('g');
-						//CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(0,0,100);
-				}
-				else if(WheelColor ==3){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('b');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(0,100,0);
-				}
-				else if(WheelColor ==4){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('y');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(100,0,100);
-				}
-				else if(WheelColor ==5){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('c');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(0,100,100);
-				}
-				else if(WheelColor ==6){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('p');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(100,100,0);
-				}
-				else if(WheelColor ==7){
-					if(SENDCOLOR){
-						SENDCOLOR = false;
-						UART4_OutChar('w');
-					//	CurrentState = Mode2_WaitForMCU2;
-					}
-					PortF_SetRGB(100,100,100);
-				}
+		case Mode2_SelectColor:
+
 				
+		
+				if(UpdateColorDisplay){
+						UpdateColorDisplay = false;
+
+						if(WheelColor == 0){
+								PortF_SetRGB(0,0,0);
+								UART0_OutString((uint8_t*)"Current color: Dark\r\n");
+						}
+						else if(WheelColor == 1){
+								PortF_SetRGB(100,0,0);
+								UART0_OutString((uint8_t*)"Current color: Red\r\n");
+						}
+						else if(WheelColor == 2){
+								PortF_SetRGB(0,0,100);
+								UART0_OutString((uint8_t*)"Current color: Green\r\n");
+						}
+						else if(WheelColor == 3){
+								PortF_SetRGB(0,100,0);
+								UART0_OutString((uint8_t*)"Current color: Blue\r\n");
+						}
+						else if(WheelColor == 4){
+								PortF_SetRGB(100,0,100);
+								UART0_OutString((uint8_t*)"Current color: Yellow\r\n");
+						}
+						else if(WheelColor == 5){
+								PortF_SetRGB(0,100,100);
+								UART0_OutString((uint8_t*)"Current color: Cyan\r\n");
+						}
+						else if(WheelColor == 6){
+								PortF_SetRGB(100,100,0);
+								UART0_OutString((uint8_t*)"Current color: Purple\r\n");
+						}
+						else if(WheelColor == 7){
+								PortF_SetRGB(100,100,100);
+								UART0_OutString((uint8_t*)"Current color: White\r\n");
+						}
+				}
+
+				if(SENDCOLOR){
+						SENDCOLOR = false;
+
+						if(WheelColor == 0) UART4_OutChar('d');
+						else if(WheelColor == 1) UART4_OutChar('r');
+						else if(WheelColor == 2) UART4_OutChar('g');
+						else if(WheelColor == 3) UART4_OutChar('b');
+						else if(WheelColor == 4) UART4_OutChar('y');
+						else if(WheelColor == 5) UART4_OutChar('c');
+						else if(WheelColor == 6) UART4_OutChar('p');
+						else if(WheelColor == 7) UART4_OutChar('w');
+
+						UART0_OutString((uint8_t*)"Waiting for color code from MCU2 ...\r\n");
+						CurrentState = Mode2_WaitForMCU2;
+				}
+
 				break;
 				
 				//Wait for MCU 2 response
@@ -420,11 +385,12 @@ void GPIOPortF_Handler(void){
     }
     if(status & SW2){
 			DelayMs(20);
-			WheelColor +=1;
+			WheelColor ++;
 			
 			if(WheelColor == 8){
 				WheelColor = 0;
 			}
+			UpdateColorDisplay = true;
         
     }
 }
