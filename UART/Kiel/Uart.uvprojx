@@ -396,16 +396,6 @@
               <FilePath>..\Src\startup.s</FilePath>
             </File>
             <File>
-              <FileName>Uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\Uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>Uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Src\Uart.h</FilePath>
-            </File>
-            <File>
               <FileName>PLL.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\PLL.c</FilePath>
@@ -429,6 +419,31 @@
               <FileName>ModuleTest.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\ModuleTest.c</FilePath>
+            </File>
+            <File>
+              <FileName>UART0.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\UART0.c</FilePath>
+            </File>
+            <File>
+              <FileName>UART0.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Src\UART0.h</FilePath>
+            </File>
+            <File>
+              <FileName>UART4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\UART4.c</FilePath>
+            </File>
+            <File>
+              <FileName>UART4.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Src\UART4.h</FilePath>
+            </File>
+            <File>
+              <FileName>States.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Src\States.h</FilePath>
             </File>
           </Files>
         </Group>

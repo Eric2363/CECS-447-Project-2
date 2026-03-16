@@ -14,7 +14,7 @@ SW1 - G  - B  - R  - SW2
  */
 
 
-// PortF register Mask
+// PortF  Mask
 #define PORTF 0x20
 #define PWM 0x02
 
@@ -42,4 +42,4 @@ SW1 - G  - B  - R  - SW2
 
 void PortF_Init(void);
 
-void PortF_SetDuty(uint8_t led, uint8_t duty);
+void PortF_SetRGB(uint8_t red, uint8_t blue, uint8_t green);
