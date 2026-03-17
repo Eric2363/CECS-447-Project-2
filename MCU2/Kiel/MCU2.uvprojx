@@ -435,6 +435,11 @@
               <FileType>5</FileType>
               <FilePath>..\Src\UART0.h</FilePath>
             </File>
+            <File>
+              <FileName>States.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Src\States.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

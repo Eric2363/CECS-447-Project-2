@@ -5,228 +5,249 @@
 #include "PortF.h"
 #include "stdint.h"
 #include "stdbool.h"
+#include "States.h"
 
+
+// Function prototypes
 void SystemInit(void);
-
 void DelayMs(uint32_t ms);
-void LedColor(char color);
-bool ColorWheelSelected = false;
+void setLed(char color);
+char getColor(uint8_t c);
+void PrintColorName(char c);
+void ResetToIdle(void);
+// Flags
 volatile uint8_t WheelColor = 0;
-
 volatile bool SENDCOLOR = false;
+volatile bool UpdateColorDisplay = false;
 
 
+// Start in idle
+volatile State currentState = MCU_IDLE;
 
-typedef enum{
-    LISTEN,
-    TALK
-} MODE;
-
-typedef enum{
-    MCU2_IDLE,
-    MODE2_WAIT_COLOR,
-    MODE2_SELECT_COLOR,
-    MODE3_CHAT
-} STATE;
-
-STATE CurrentState = MCU2_IDLE;
+// Received char from MCU1
+char mcuListen;
 
 int main(void){
 
     SystemInit();
     DelayMs(100);
 
+    UART0_OutCRLF();
+    UART0_OutString((uint8_t*)"Welcome to CECS 447 Project 2 - UART\r\n");
+    UART0_OutString((uint8_t*)"MCU2\r\n");
+    UART0_OutString((uint8_t*)"Waiting for command from MCU1 ...\r\n");
 
-while(1){
+    while(1){
 
-    char c;
+        switch(currentState){
 
-    switch(CurrentState){
+            case MCU_IDLE:
+                // Wait for command from MCU1
+                mcuListen = UART5_InChar();
 
-        case MCU2_IDLE:
+                if(mcuListen == '2'){
+                    WheelColor = 0;
+                    SENDCOLOR = false;
+                    UpdateColorDisplay = false;
 
-            // waiting for MCU1 to start Mode2
-            c = UART5_InChar();
+                    UART0_OutCRLF();
+                    UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
+                    UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
 
-            if(c == '2'){
-                UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
-                UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
-
-                CurrentState = MODE2_WAIT_COLOR;
-            }
-
-        break;
-
-
-        case MODE2_WAIT_COLOR:
-
-            c = UART5_InChar();
-
-            // MCU1 exited mode
-            if(c == '^'){
-                GPIO_PORTF_DATA_R &= ~LEDS;
-                CurrentState = MCU2_IDLE;
+                    currentState = MODE2_WAIT_COLOR;
+                }
                 break;
-            }
 
-            LedColor(c);
+					case MODE2_WAIT_COLOR:
+							mcuListen = UART5_InChar();
 
-            UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
-            UART0_OutString((uint8_t*)"In color Wheel State.\r\n");
-            UART0_OutString((uint8_t*)"Please press sw2 to go through the colors in the following color wheel: Dark, Red, Green, Blue, Yellow, Cyan, Purple, White.\r\n");
-            UART0_OutString((uint8_t*)"Once a color is selected, press sw1 to send the color to MCU1.\r\n");
+							if(mcuListen == '^'){
+									ResetToIdle();
+							}
+							else{
+									setLed(mcuListen);
 
-            UART0_OutString((uint8_t*)"Current color: ");
+									UART0_OutString((uint8_t*)"Current color: ");
+									PrintColorName(mcuListen);
 
-            switch(c){
-                case 'd': UART0_OutString((uint8_t*)"Dark\r\n"); break;
-                case 'r': UART0_OutString((uint8_t*)"Red\r\n"); break;
-                case 'g': UART0_OutString((uint8_t*)"Green\r\n"); break;
-                case 'b': UART0_OutString((uint8_t*)"Blue\r\n"); break;
-                case 'y': UART0_OutString((uint8_t*)"Yellow\r\n"); break;
-                case 'c': UART0_OutString((uint8_t*)"Cyan\r\n"); break;
-                case 'p': UART0_OutString((uint8_t*)"Purple\r\n"); break;
-                case 'w': UART0_OutString((uint8_t*)"White\r\n"); break;
-            }
+									switch(mcuListen){
+											case 'd': WheelColor = 0; break;
+											case 'r': WheelColor = 1; break;
+											case 'g': WheelColor = 2; break;
+											case 'b': WheelColor = 3; break;
+											case 'y': WheelColor = 4; break;
+											case 'c': WheelColor = 5; break;
+											case 'p': WheelColor = 6; break;
+											case 'w': WheelColor = 7; break;
+											default:  WheelColor = 0; break;
+									}
 
-            CurrentState = MODE2_SELECT_COLOR;
+									UART0_OutString((uint8_t*)"In color Wheel State.\r\n");
+									UART0_OutString((uint8_t*)"Please press sw2 to go through the colors in\r\n");
+									UART0_OutString((uint8_t*)"the following color wheel: Dark, Red, Green,\r\n");
+									UART0_OutString((uint8_t*)"Blue, Yellow, Cyan, Purple, White.\r\n");
+									UART0_OutString((uint8_t*)"Once a color is selected, press sw1 to send\r\n");
+									UART0_OutString((uint8_t*)"the color to MCU1.\r\n");
+									UART0_OutString((uint8_t*)"Current color: ");
+									PrintColorName(getColor(WheelColor));
 
-        break;
+									currentState = MODE2_SELECT_COLOR;
+							}
+							break;
 
+								case MODE2_SELECT_COLOR:
+										// non-blocking check for exit command from MCU1
+										if(UART5_Available()){
+												mcuListen = UART5_InChar();
 
-        case MODE2_SELECT_COLOR:
+												if(mcuListen == '^'){
+														ResetToIdle();
+														break;
+												}
+										}
 
-            if(SENDCOLOR){
+										// SW2 was pressed: update displayed color
+										if(UpdateColorDisplay){
+												UpdateColorDisplay = false;
 
-                SENDCOLOR = false;
+												char c = getColor(WheelColor);
+												setLed(c);
 
-                char color;
+												UART0_OutString((uint8_t*)"Current color: ");
+												PrintColorName(c);
+										}
 
-                switch(WheelColor){
-                    case 0: color = 'd'; break;
-                    case 1: color = 'r'; break;
-                    case 2: color = 'g'; break;
-                    case 3: color = 'b'; break;
-                    case 4: color = 'y'; break;
-                    case 5: color = 'c'; break;
-                    case 6: color = 'p'; break;
-                    case 7: color = 'w'; break;
-                }
+										// SW1 was pressed: send selected color to MCU1
+										if(SENDCOLOR){
+												SENDCOLOR = false;
 
-                UART5_OutChar(color);
+												char c = getColor(WheelColor);
+												UART5_OutChar(c);
 
-                UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
-                UART0_OutString((uint8_t*)"Current color: ");
+												UART0_OutString((uint8_t*)"Current color: ");
+												PrintColorName(c);
+												UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
 
-                switch(color){
-                    case 'd': UART0_OutString((uint8_t*)"Dark\r\n"); break;
-                    case 'r': UART0_OutString((uint8_t*)"Red\r\n"); break;
-                    case 'g': UART0_OutString((uint8_t*)"Green\r\n"); break;
-                    case 'b': UART0_OutString((uint8_t*)"Blue\r\n"); break;
-                    case 'y': UART0_OutString((uint8_t*)"Yellow\r\n"); break;
-                    case 'c': UART0_OutString((uint8_t*)"Cyan\r\n"); break;
-                    case 'p': UART0_OutString((uint8_t*)"Purple\r\n"); break;
-                    case 'w': UART0_OutString((uint8_t*)"White\r\n"); break;
-                }
-
-                UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
-
-                CurrentState = MODE2_WAIT_COLOR;
-            }
-
-        break;
-
-
-        case MODE3_CHAT:
-
-            // placeholder for Mode3
-            break;
+												currentState = MODE2_WAIT_COLOR;
+										}
+										break;
+        }
     }
 }
 
+void SystemInit(void){
+    PLL_Init();
+    PortF_Init();
+    UART0_Init();
+    UART5_Init();
 }
-
-void SystemInit(){
-
-	PLL_Init();
-	PortF_Init();
-	UART0_Init();
-	UART5_Init();
-	
-}
-
-
 
 void DelayMs(uint32_t ms){
     volatile uint32_t count;
-    
+
     while(ms--){
         count = 12500;   // ~1ms at 50MHz
         while(count--){
         }
     }
 }
+
 void GPIOPortF_Handler(void){
-    uint32_t status = GPIO_PORTF_MIS_R; // latch cause
-    GPIO_PORTF_ICR_R = status;          // clear flags
-		
+    uint32_t status = GPIO_PORTF_MIS_R;
+    GPIO_PORTF_ICR_R = status;
+
     if(status & SW1){
-			DelayMs(20);
-			
-			SENDCOLOR = true;
-       
+        DelayMs(15);
+        if(currentState == MODE2_SELECT_COLOR){
+            SENDCOLOR = true;
+        }
     }
+
     if(status & SW2){
-			DelayMs(20);
-			WheelColor +=1;
-			
-			if(WheelColor == 8){
-				WheelColor = 0;
-			}
-        
+        DelayMs(15);
+        if(currentState == MODE2_SELECT_COLOR){
+            WheelColor++;
+            if(WheelColor >= 8){
+                WheelColor = 0;
+            }
+            UpdateColorDisplay = true;
+        }
     }
 }
 
-void LedColor(char color){
-	GPIO_PORTF_DATA_R &=~LEDS;
-    switch(color){
+char getColor(uint8_t c){
+    if(c > 7) c = 0;
 
+    char Colors[] = {'d','r','g','b','y','c','p','w'};
+    return Colors[c];
+}
+
+void PrintColorName(char c){
+    switch(c){
+        case 'd': UART0_OutString((uint8_t*)"Dark\r\n");   break;
+        case 'r': UART0_OutString((uint8_t*)"Red\r\n");    break;
+        case 'g': UART0_OutString((uint8_t*)"Green\r\n");  break;
+        case 'b': UART0_OutString((uint8_t*)"Blue\r\n");   break;
+        case 'y': UART0_OutString((uint8_t*)"Yellow\r\n"); break;
+        case 'c': UART0_OutString((uint8_t*)"Cyan\r\n");   break;
+        case 'p': UART0_OutString((uint8_t*)"Purple\r\n"); break;
+        case 'w': UART0_OutString((uint8_t*)"White\r\n");  break;
+        default:  UART0_OutString((uint8_t*)"Unknown\r\n"); break;
+    }
+}
+
+void setLed(char color){
+    GPIO_PORTF_DATA_R &= ~LEDS;
+
+    switch(color){
         case 'd':
-						
-						GPIO_PORTF_DATA_R &=~LEDS;
-            
+            GPIO_PORTF_DATA_R &= ~LEDS;
             break;
 
         case 'r':
-						
-						GPIO_PORTF_DATA_R = RED;
-            
+            GPIO_PORTF_DATA_R = RED;
             break;
 
         case 'g':
-						GPIO_PORTF_DATA_R = GREEN;
-            
+            GPIO_PORTF_DATA_R = GREEN;
             break;
 
         case 'b':
-						GPIO_PORTF_DATA_R = BLUE;
-            
+            GPIO_PORTF_DATA_R = BLUE;
             break;
-				
-				case 'y':
-						GPIO_PORTF_DATA_R = YELLOW;
-						
-						break;
-				case 'c':
-						GPIO_PORTF_DATA_R = CYAN;
-						
-						break;
-				case 'p':
-						GPIO_PORTF_DATA_R = PURPLE;
-						
-						break;
-				case 'w':
-						GPIO_PORTF_DATA_R = LEDS;
-						
+
+        case 'y':
+            GPIO_PORTF_DATA_R = YELLOW;
+            break;
+
+        case 'c':
+            GPIO_PORTF_DATA_R = CYAN;
+            break;
+
+        case 'p':
+            GPIO_PORTF_DATA_R = PURPLE;
+            break;
+
+        case 'w':
+            GPIO_PORTF_DATA_R = LEDS;
+            break;
+
+        default:
+            UART0_OutString((uint8_t*)"Invalid color\r\n");
+            break;
     }
+}
+void ResetToIdle(void){
+    SENDCOLOR = false;
+    UpdateColorDisplay = false;
+    WheelColor = 0;
+
+    GPIO_PORTF_DATA_R &= ~LEDS;
+
+    UART0_OutCRLF();
+    UART0_OutString((uint8_t*)"Welcome to CECS 447 Project 2 - UART\r\n");
+    UART0_OutString((uint8_t*)"MCU2\r\n");
+    UART0_OutString((uint8_t*)"Waiting for command from MCU1 ...\r\n");
+
+    currentState = MCU_IDLE;
 }

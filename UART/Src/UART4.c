@@ -48,7 +48,7 @@ bool rb4_Get(RingBuffer *rb, uint8_t *data){
 }
 
 
-// UART4 on PC4/PC5
+// UART4 on PC4Rx/PC5Tx
 // Baud rate: 14400 for 50 MHz clock
 // UART4 interrupt priority: Level 1
 void UART4_Init(void){

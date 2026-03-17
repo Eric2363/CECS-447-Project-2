@@ -3,9 +3,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "States.h"
+#include "PortF.h"
+#include "UART4.h"
 
 #define UART0_NVIC_EN   0x20
 #define RB_SIZE         64
+
+extern volatile State CurrentState;
+extern volatile bool SENDCOLOR;
+extern volatile bool UpdateColorDisplay;
+extern volatile uint8_t WheelColor;
 
 typedef struct{
   volatile uint16_t head;
@@ -188,14 +195,34 @@ void UART0_Handler(void){
     while((UART0_FR_R & UART_FR_RXFE) == 0){
       data = (uint8_t)(UART0_DR_R & 0xFF);
 
-      if(data == '^'){
+      // Special handling for Mode 2 exit
+      if(data == '^' &&
+         (CurrentState == Mode2_Enter ||
+          CurrentState == Mode2_MCU1_SelectColor ||
+          CurrentState == Mode2_MCU1_WaitReply)){
+
+        // Clear Mode 2 flags
+        SENDCOLOR = false;
+        UpdateColorDisplay = false;
+        WheelColor = 0;
+
+        // Turn off MCU1 LED
+        PortF_SetRGB(0,0,0);
+
+        // Tell MCU2 to exit Mode 2
+        UART4_OutChar('^');
+
+        // Return MCU1 to main menu
         CurrentState = MainMenu;
-				rb0_Put(&UART0_RxRB, data);
+
+        // Do not store '^' in the buffer
       }
       else{
+        // Normal data goes into UART0 RX ring buffer
         rb0_Put(&UART0_RxRB, data);
       }
     }
+
     UART0_ICR_R = UART_ICR_RXIC;
   }
 

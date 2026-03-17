@@ -3,9 +3,10 @@
 typedef enum States{
 	MainMenu,
 	Mode1,
-	Mode2,
-	Mode2_SelectColor,
-	Mode2_WaitForMCU2
+	Mode2_Enter,
+  Mode2_MCU1_SelectColor,
+  Mode2_MCU1_WaitReply,
+
 } State;
 
 

@@ -6,6 +6,8 @@
 #define UART5_NVIC_EN   0x20000000
 #define RB_SIZE         64
 
+
+
 typedef struct{
   volatile uint16_t head;
   volatile uint16_t tail;
@@ -48,7 +50,7 @@ bool rb5_Get(RingBuffer *rb, uint8_t *data){
 }
 
 //------------UART5_Init------------
-// Initialize UART5 on PE4/PE5
+// Initialize UART5 on PE4Rx/PE5Tx
 // Baud rate = 14400 for 50 MHz clock
 // RX interrupt always enabled
 // UART5 interrupt priority = 1
