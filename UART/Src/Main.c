@@ -7,6 +7,14 @@
 #include "stdbool.h"
 #include "States.h"
 
+//mode 3 stuff
+#define CHAT_MAX 20
+
+char Mode3TxBuffer[CHAT_MAX + 1];
+uint8_t Mode3TxIndex = 0;
+char Mode3RxBuffer[CHAT_MAX + 1];
+uint8_t Mode3RxIndex = 0;
+
 //Variables declared
 //acess in ISR or main
 volatile State CurrentState = MainMenu;
@@ -14,7 +22,7 @@ char USERINPUT;
 char mcu2Reply;
 bool ColorWheelSelected = false;
 volatile uint8_t WheelColor = 0;
-
+volatile bool Mode3ExitRequest = false;
 volatile bool SENDCOLOR = false;
 
 volatile bool UpdateColorDisplay = false;
@@ -28,6 +36,9 @@ void Mode2SetLED(char response);
 char getColor(uint8_t c);
 uint8_t ColorToIndex(char c);
 
+//mode 3
+void Mode3_SendMessageMCU1(void);
+void Mode3_ReceiveMessageMCU1(void);
 //Keep track of currently turned on color
 typedef enum Color{
 	ColorDark,
@@ -212,6 +223,9 @@ int main(void){
 										break;
 										
 									case Mode3_MCU1_Enter:
+											Mode3ExitRequest = false;
+											Mode3TxIndex = 0;
+											Mode3RxIndex = 0;
 											UART0_OutCRLF();
 											UART0_OutString((uint8_t*)"Mode 3 MCU1: Chat Room\r\n");
 											UART0_OutString((uint8_t*)"Press sw1 at any time to exit the chat room.\r\n");
@@ -224,6 +238,30 @@ int main(void){
 											CurrentState = Mode3_MCU1_Talk;
 										
 										
+											break;
+									case Mode3_MCU1_Talk:
+												if(Mode3ExitRequest){
+													Mode3ExitRequest = false;
+													UART4_OutChar('^');
+													UART0_OutCRLF();
+													UART0_OutString((uint8_t*)"Exiting Mode 3...\r\n");
+													CurrentState = MainMenu;
+												}
+												else {
+													Mode3_SendMessageMCU1();
+												}
+												break;
+									case Mode3_MCU1_Listen:
+											if(Mode3ExitRequest){
+													Mode3ExitRequest = false;
+													UART4_OutChar('^');
+													UART0_OutCRLF();
+													UART0_OutString((uint8_t*)"Exiting Mode 3...\r\n");
+													CurrentState = MainMenu;
+											}
+											else{
+													Mode3_ReceiveMessageMCU1();
+											}
 											break;
 
 			}//end of switch
@@ -397,6 +435,7 @@ void DelayMs(uint32_t ms){
         }
     }
 }
+//===============PortF Handler=====================
 void GPIOPortF_Handler(void){
     uint32_t status = GPIO_PORTF_MIS_R;
     GPIO_PORTF_ICR_R = status;
@@ -406,6 +445,10 @@ void GPIOPortF_Handler(void){
         if(CurrentState == Mode2_MCU1_SelectColor){
             SENDCOLOR = true;
         }
+				//if in mode 3 and sw1 pressed exit back to main 
+				else if(CurrentState == Mode3_MCU1_Talk || CurrentState == Mode3_MCU1_Listen){
+					Mode3ExitRequest = true;
+				}
     }
 
     if(status & SW2){
@@ -420,4 +463,65 @@ void GPIOPortF_Handler(void){
     }
 }
 
+//=================Mode3 Helpers=====================
+void Mode3_SendMessageMCU1(void){
+	char c;
 
+	if(UART0_Available()){
+		c = UART0_InChar();
+		UART0_OutChar(c);
+
+		if(c != '\r'){
+			if(Mode3TxIndex < CHAT_MAX){
+				Mode3TxBuffer[Mode3TxIndex] = c;
+				Mode3TxIndex++;
+			}
+		}
+		else{
+			Mode3TxBuffer[Mode3TxIndex] = 0;
+
+			UART4_OutString((uint8_t*)Mode3TxBuffer);
+			UART4_OutChar('\r');
+
+			UART0_OutCRLF();
+
+			Mode3TxIndex = 0;
+			CurrentState = Mode3_MCU1_Listen;
+		}
+	}
+}
+void Mode3_ReceiveMessageMCU1(void){
+	char c;
+
+	if(UART4_Available()){
+		c = UART4_InChar();
+		if(c == '^'){
+			UART0_OutCRLF();
+			UART0_OutString((uint8_t*)"MCU2 exited Mode 3...\r\n");
+			CurrentState = MainMenu;
+			Mode3RxIndex = 0;
+			return;
+		}
+
+		if(c != '\r'){
+			if(Mode3RxIndex < CHAT_MAX){
+				Mode3RxBuffer[Mode3RxIndex] = c;
+				Mode3RxIndex++;
+			}
+		}
+		else{
+			Mode3RxBuffer[Mode3RxIndex] = 0;
+
+			UART0_OutCRLF();
+			UART0_OutString((uint8_t*)"Message from MCU2: ");
+			UART0_OutString((uint8_t*)Mode3RxBuffer);
+			UART0_OutCRLF();
+
+			Mode3RxIndex = 0;
+			CurrentState = Mode3_MCU1_Talk;
+
+			UART0_OutString((uint8_t*)"Please type a message end with a return\r\n");
+			UART0_OutString((uint8_t*)"(less than 20 characters):\r\n");
+		}
+	}
+}
