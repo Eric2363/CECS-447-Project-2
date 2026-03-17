@@ -7,6 +7,12 @@
 #include "stdbool.h"
 #include "States.h"
 
+//mode 3 stuff
+#define CHAT_MAX 20
+char Mode3TxBuffer[CHAT_MAX + 1];
+uint8_t Mode3TxIndex = 0;
+char Mode3RxBuffer[CHAT_MAX + 1];
+uint8_t Mode3RxIndex = 0;
 
 // Function prototypes
 void SystemInit(void);
@@ -15,11 +21,16 @@ void setLed(char color);
 char getColor(uint8_t c);
 void PrintColorName(char c);
 void ResetToIdle(void);
+
+//mode 3
+void Mode3_ReceiveMessageMCU2(void);
+void Mode3_SendMessageMCU2(void);
+
 // Flags
 volatile uint8_t WheelColor = 0;
 volatile bool SENDCOLOR = false;
 volatile bool UpdateColorDisplay = false;
-
+volatile bool Mode3ExitRequest = false;
 
 // Start in idle
 volatile State currentState = MCU_IDLE;
@@ -56,6 +67,9 @@ int main(void){
 
                     currentState = MODE2_WAIT_COLOR;
                 }
+								else if (mcuListen == '3'){
+									currentState = MODE3_ENTER;
+								}
                 break;
 
 					case MODE2_WAIT_COLOR:
@@ -131,9 +145,49 @@ int main(void){
 												currentState = MODE2_WAIT_COLOR;
 										}
 										break;
-        }
-    }
-}
+										case MODE3_ENTER:
+												
+												Mode3ExitRequest = false;
+												Mode3TxIndex = 0;
+												Mode3RxIndex = 0;
+												UART0_OutCRLF();
+												UART0_OutString((uint8_t*)"Mode 3 MCU2: Chat Room\r\n");
+												UART0_OutString((uint8_t*)"Press sw1 at any time to exit the chat room.\r\n");
+												UART0_OutCRLF();
+												UART0_OutString((uint8_t*)"Waiting for a message from MCU1 ...\r\n");
+
+												currentState = MODE3_LISTEN;
+												break;
+										case MODE3_LISTEN:
+											if(Mode3ExitRequest){
+													Mode3ExitRequest = false;
+													UART5_OutChar('^');
+													UART0_OutCRLF();
+													UART0_OutString((uint8_t*)"Exiting Mode 3...\r\n");
+											}
+											else {
+												Mode3_ReceiveMessageMCU2();
+												
+											}
+												
+										break;
+										case MODE3_TALK:
+											if(Mode3ExitRequest){
+													Mode3ExitRequest = false;
+													UART5_OutChar('^');
+													UART0_OutCRLF();
+													UART0_OutString((uint8_t*)"Exiting Mode 3...\r\n");
+													ResetToIdle();
+											}
+											else{
+													Mode3_SendMessageMCU2();
+											}
+										break;
+										
+										
+        }//end of switch
+    }//end of while
+}//end of main
 
 void SystemInit(void){
     PLL_Init();
@@ -161,6 +215,9 @@ void GPIOPortF_Handler(void){
         if(currentState == MODE2_SELECT_COLOR){
             SENDCOLOR = true;
         }
+				else if (currentState == MODE3_LISTEN || currentState == MODE3_TALK){
+					Mode3ExitRequest = true;
+				}
     }
 
     if(status & SW2){
@@ -250,4 +307,70 @@ void ResetToIdle(void){
     UART0_OutString((uint8_t*)"Waiting for command from MCU1 ...\r\n");
 
     currentState = MCU_IDLE;
+}
+
+// Mode 3 process incoming msg
+void Mode3_ReceiveMessageMCU2(void){
+    char c;
+
+    if(UART5_Available()){
+        c = UART5_InChar();
+
+        if(c == '^'){
+            UART0_OutCRLF();
+            UART0_OutString((uint8_t*)"MCU1 exited Mode 3...\r\n");
+            Mode3RxIndex = 0;
+            ResetToIdle();
+            return;
+        }
+
+        if(c != '\r'){
+            if(Mode3RxIndex < CHAT_MAX){
+                Mode3RxBuffer[Mode3RxIndex] = c;
+                Mode3RxIndex++;
+            }
+        }
+        else{
+            Mode3RxBuffer[Mode3RxIndex] = 0;
+
+            UART0_OutCRLF();
+            UART0_OutString((uint8_t*)"Message from MCU1: ");
+            UART0_OutString((uint8_t*)Mode3RxBuffer);
+            UART0_OutCRLF();
+
+            Mode3RxIndex = 0;
+            currentState = MODE3_TALK;
+
+            UART0_OutString((uint8_t*)"Please type a message end with a return\r\n");
+            UART0_OutString((uint8_t*)"(less than 20 characters):\r\n");
+        }
+    }
+}
+void Mode3_SendMessageMCU2(void){
+    char c;
+
+    if(UART0_Available()){
+        c = UART0_InChar();
+        UART0_OutChar(c);
+
+        if(c != '\r'){
+            if(Mode3TxIndex < CHAT_MAX){
+                Mode3TxBuffer[Mode3TxIndex] = c;
+                Mode3TxIndex++;
+            }
+        }
+        else{
+            Mode3TxBuffer[Mode3TxIndex] = 0;
+
+            UART5_OutString((uint8_t*)Mode3TxBuffer);
+            UART5_OutChar('\r');
+
+            UART0_OutCRLF();
+
+            Mode3TxIndex = 0;
+            currentState = MODE3_LISTEN;
+
+            UART0_OutString((uint8_t*)"Waiting for a message from MCU1 ...\r\n");
+        }
+    }
 }
