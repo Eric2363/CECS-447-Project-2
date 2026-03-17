@@ -78,7 +78,7 @@ int main(void){
 						CurrentState = Mode2_Enter;
 					}
 					else if (USERINPUT == '3'){
-					//	CurrentState = Mode3;
+						CurrentState = Mode3_MCU1_Enter;
 					}
 				break;
 					
@@ -210,6 +210,21 @@ int main(void){
 												CurrentState = Mode2_MCU1_SelectColor;
 										}
 										break;
+										
+									case Mode3_MCU1_Enter:
+											UART0_OutCRLF();
+											UART0_OutString((uint8_t*)"Mode 3 MCU1: Chat Room\r\n");
+											UART0_OutString((uint8_t*)"Press sw1 at any time to exit the chat room.\r\n");
+											UART0_OutCRLF();
+											UART0_OutString((uint8_t*)"Please type a message end with a return\r\n");
+											UART0_OutString((uint8_t*)"(less than 20 characters):\r\n");
+
+											UART4_OutChar('3');   // tell MCU2 to enter mode 3
+
+											CurrentState = Mode3_MCU1_Talk;
+										
+										
+											break;
 
 			}//end of switch
 
