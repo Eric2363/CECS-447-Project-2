@@ -79,6 +79,8 @@ void PortF_Init(void){
 // red, blue, green: duty cycle 0=OFF, 100=FULL
 void PortF_SetRGB(uint8_t red, uint8_t blue, uint8_t green)
 {
+	// TODO i need to clamp the inputs to 100 if greater
+	
     uint32_t period = (uint32_t)PWM_LOAD + 1;
     uint32_t cmpR, cmpB, cmpG;
 
@@ -96,6 +98,7 @@ void PortF_SetRGB(uint8_t red, uint8_t blue, uint8_t green)
 				}
     }
 
+		
     if(blue == 0){
 			cmpB = 0;
 		}

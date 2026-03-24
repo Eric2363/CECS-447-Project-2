@@ -1,5 +1,6 @@
 #include "stdint.h"
 
+//all menu option states
 typedef enum States{
 	MainMenu,
 	Mode1,

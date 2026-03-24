@@ -54,36 +54,45 @@ int main(void){
 
             case MCU_IDLE:
                 // Wait for command from MCU1
-                mcuListen = UART5_InChar();
+								if(UART5_Available()){
+									mcuListen = UART5_InChar();
+									
+									//  check if we go into mode 2
+									if(mcuListen == '2'){
+											WheelColor = 0;// current color index
+											SENDCOLOR = false;// flag to send color
+											UpdateColorDisplay = false;// update screen
 
-                if(mcuListen == '2'){
-                    WheelColor = 0;
-                    SENDCOLOR = false;
-                    UpdateColorDisplay = false;
+											UART0_OutCRLF();
+											UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
+											UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
 
-                    UART0_OutCRLF();
-                    UART0_OutString((uint8_t*)"Mode 2 MCU2\r\n");
-                    UART0_OutString((uint8_t*)"Waiting for color code from MCU1 ...\r\n");
-
-                    currentState = MODE2_WAIT_COLOR;
-                }
-								else if (mcuListen == '3'){
-									currentState = MODE3_ENTER;
-								}
+											currentState = MODE2_WAIT_COLOR;
+									}
+									// listen for mode 3
+									else if (mcuListen == '3'){
+										currentState = MODE3_ENTER;
+									}
+							}
                 break;
 
+								// wait for mcu1 to send a color
 					case MODE2_WAIT_COLOR:
 							mcuListen = UART5_InChar();
 
+							// check if we got exit command
 							if(mcuListen == '^'){
 									ResetToIdle();
 							}
+							//update color
 							else{
+								// update leds and display new color on screen
 									setLed(mcuListen);
 
 									UART0_OutString((uint8_t*)"Current color: ");
 									PrintColorName(mcuListen);
 
+								// update color index
 									switch(mcuListen){
 											case 'd': WheelColor = 0; break;
 											case 'r': WheelColor = 1; break;
@@ -95,7 +104,7 @@ int main(void){
 											case 'w': WheelColor = 7; break;
 											default:  WheelColor = 0; break;
 									}
-
+									// print menu
 									UART0_OutString((uint8_t*)"In color Wheel State.\r\n");
 									UART0_OutString((uint8_t*)"Please press sw2 to go through the colors in\r\n");
 									UART0_OutString((uint8_t*)"the following color wheel: Dark, Red, Green,\r\n");
@@ -109,11 +118,13 @@ int main(void){
 							}
 							break;
 
+							// mcu2's turn to choose a color
 								case MODE2_SELECT_COLOR:
 										// non-blocking check for exit command from MCU1
 										if(UART5_Available()){
 												mcuListen = UART5_InChar();
 
+											// check for exit command
 												if(mcuListen == '^'){
 														ResetToIdle();
 														break;
@@ -164,6 +175,7 @@ int main(void){
 													UART5_OutChar('^');
 													UART0_OutCRLF();
 													UART0_OutString((uint8_t*)"Exiting Mode 3...\r\n");
+													ResetToIdle();
 											}
 											else {
 												Mode3_ReceiveMessageMCU2();
@@ -171,6 +183,7 @@ int main(void){
 											}
 												
 										break;
+											
 										case MODE3_TALK:
 											if(Mode3ExitRequest){
 													Mode3ExitRequest = false;
@@ -294,11 +307,14 @@ void setLed(char color){
             break;
     }
 }
+// reset flags and leds and go back to waiting state
 void ResetToIdle(void){
     SENDCOLOR = false;
     UpdateColorDisplay = false;
+		Mode3ExitRequest = false;
     WheelColor = 0;
-
+		Mode3RxIndex = 0;
+		Mode3TxIndex = 0;
     GPIO_PORTF_DATA_R &= ~LEDS;
 
     UART0_OutCRLF();
@@ -318,7 +334,7 @@ void Mode3_ReceiveMessageMCU2(void){
 
         if(c == '^'){
             UART0_OutCRLF();
-            UART0_OutString((uint8_t*)"MCU1 exited Mode 3...\r\n");
+           // UART0_OutString((uint8_t*)"MCU1 exited Mode 3...\r\n");
             Mode3RxIndex = 0;
             ResetToIdle();
             return;
@@ -334,8 +350,11 @@ void Mode3_ReceiveMessageMCU2(void){
             Mode3RxBuffer[Mode3RxIndex] = 0;
 
             UART0_OutCRLF();
+						//make msg purple
+						UART0_OutString((uint8_t*)COLOR_MAGENTA);
             UART0_OutString((uint8_t*)"Message from MCU1: ");
             UART0_OutString((uint8_t*)Mode3RxBuffer);
+						UART0_OutString((uint8_t*)COLOR_RESET);
             UART0_OutCRLF();
 
             Mode3RxIndex = 0;
@@ -346,13 +365,17 @@ void Mode3_ReceiveMessageMCU2(void){
         }
     }
 }
+//
 void Mode3_SendMessageMCU2(void){
     char c;
 
     if(UART0_Available()){
         c = UART0_InChar();
+				//make mcu mgs green
+				UART0_OutString((uint8_t*)COLOR_GREEN);
         UART0_OutChar(c);
-
+				UART0_OutString((uint8_t*)COLOR_RESET);
+			
         if(c != '\r'){
             if(Mode3TxIndex < CHAT_MAX){
                 Mode3TxBuffer[Mode3TxIndex] = c;

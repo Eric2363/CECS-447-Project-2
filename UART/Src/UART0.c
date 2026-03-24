@@ -64,7 +64,7 @@ bool rb0_Get(RingBuffer *rb, uint8_t *data){
 void UART0_Init(void){
   SYSCTL_RCGCUART_R |= 0x01;   // activate UART0
   SYSCTL_RCGCGPIO_R |= 0x01;   // activate Port A
-  while((SYSCTL_PRGPIO_R & 0x01) == 0){}
+  while((SYSCTL_PRGPIO_R & 0x01) != 0x01){}
 
   rb0_Init(&UART0_RxRB);
 
@@ -196,10 +196,7 @@ void UART0_Handler(void){
       data = (uint8_t)(UART0_DR_R & 0xFF);
 
       // Special handling for Mode 2 exit
-      if(data == '^' &&
-         (CurrentState == Mode2_Enter ||
-          CurrentState == Mode2_MCU1_SelectColor ||
-          CurrentState == Mode2_MCU1_WaitReply)){
+      if(data == '^' && (CurrentState == Mode2_Enter || CurrentState == Mode2_MCU1_SelectColor || CurrentState == Mode2_MCU1_WaitReply)){
 
         // Clear Mode 2 flags
         SENDCOLOR = false;

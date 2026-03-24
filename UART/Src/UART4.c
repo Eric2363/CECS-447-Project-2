@@ -54,7 +54,7 @@ bool rb4_Get(RingBuffer *rb, uint8_t *data){
 void UART4_Init(void){
   SYSCTL_RCGCUART_R |= 0x10;   // activate UART4
   SYSCTL_RCGCGPIO_R |= 0x04;   // activate Port C
-  while((SYSCTL_PRGPIO_R & 0x04) == 0){}
+  while((SYSCTL_PRGPIO_R & 0x04) != 0x04){}
 
   rb4_Init(&UART4_RxRB);
 

@@ -50,19 +50,19 @@ bool rb0_Get(RingBuffer *rb, uint8_t *data){
 
 //------------UART0_Init------------
 // Initialize UART0 on PA0/PA1
-// Baud rate = 9600 for 50 MHz clock
+// Baud rate = 19200 for 50 MHz clock
 // RX interrupt always enabled
 // UART0 interrupt priority = 0
 void UART0_Init(void){
   SYSCTL_RCGCUART_R |= 0x01;   // activate UART0
   SYSCTL_RCGCGPIO_R |= 0x01;   // activate Port A
-  while((SYSCTL_PRGPIO_R & 0x01) == 0){}
+  while((SYSCTL_PRGPIO_R & 0x01) !=0x01){}
 
   rb0_Init(&UART0_RxRB);
 
   UART0_CTL_R &= ~UART_CTL_UARTEN;   // disable UART
-  UART0_IBRD_R = 325;                // 50 MHz, 9600 baud
-  UART0_FBRD_R = 33;
+  UART0_IBRD_R = 162;                // 50 MHz, 19200 baud
+  UART0_FBRD_R = 49;
   UART0_LCRH_R = UART_LCRH_WLEN_8;   // 8-bit, no parity, 1 stop, FIFO off
   UART0_ICR_R  = 0x7FF;              // clear all interrupt flags
   UART0_IM_R   = 0x00;               // mask all interrupts first

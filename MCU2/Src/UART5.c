@@ -57,7 +57,7 @@ bool rb5_Get(RingBuffer *rb, uint8_t *data){
 void UART5_Init(void){
   SYSCTL_RCGCUART_R |= 0x20;   // activate UART5
   SYSCTL_RCGCGPIO_R |= 0x10;   // activate Port E
-  while((SYSCTL_PRGPIO_R & 0x10) == 0){}
+  while((SYSCTL_PRGPIO_R & 0x10) != 0x10){}
 
   rb5_Init(&UART5_RxRB);
 

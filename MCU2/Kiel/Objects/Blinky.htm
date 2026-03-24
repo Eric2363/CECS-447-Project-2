@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\Blinky.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\Blinky.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6210000: Last Updated: Tue Mar 17 13:56:10 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6210000: Last Updated: Tue Mar 24 16:18:45 2026
 <BR><P>
 <H3>Maximum Stack Usage =        100 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -777,19 +777,19 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup.o(RESET)
 </UL>
-<P><STRONG><a name="[8f]"></a>Mode3_ReceiveMessageMCU2</STRONG> (Thumb, 230 bytes, Stack size 24 bytes, main.o(.text.Mode3_ReceiveMessageMCU2))
+<P><STRONG><a name="[8f]"></a>Mode3_ReceiveMessageMCU2</STRONG> (Thumb, 242 bytes, Stack size 24 bytes, main.o(.text.Mode3_ReceiveMessageMCU2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = Mode3_ReceiveMessageMCU2 &rArr; UART5_InChar &rArr; rb5_Get &rArr; rb5_Empty
 </UL>
-<BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_Available
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
+<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_InChar
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_Available
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutCRLF
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[95]"></a>Mode3_SendMessageMCU2</STRONG> (Thumb, 168 bytes, Stack size 24 bytes, main.o(.text.Mode3_SendMessageMCU2))
+<P><STRONG><a name="[95]"></a>Mode3_SendMessageMCU2</STRONG> (Thumb, 192 bytes, Stack size 24 bytes, main.o(.text.Mode3_SendMessageMCU2))
 <BR><BR>[Stack]<UL><LI>Max Depth = 68<LI>Call Chain = Mode3_SendMessageMCU2 &rArr; UART0_InChar &rArr; rb0_Get &rArr; rb0_Empty
 </UL>
 <BR>[Calls]<UL><LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_OutString
@@ -797,7 +797,7 @@ Global Symbols
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_InChar
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_Available
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_OutChar
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutCRLF
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -816,15 +816,15 @@ Global Symbols
 <P><STRONG><a name="[9b]"></a>PrintColorName</STRONG> (Thumb, 182 bytes, Stack size 16 bytes, main.o(.text.PrintColorName))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = PrintColorName &rArr; UART0_OutString &rArr; UART0_OutChar
 </UL>
-<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[94]"></a>ResetToIdle</STRONG> (Thumb, 110 bytes, Stack size 16 bytes, main.o(.text.ResetToIdle))
+<P><STRONG><a name="[93]"></a>ResetToIdle</STRONG> (Thumb, 140 bytes, Stack size 16 bytes, main.o(.text.ResetToIdle))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = ResetToIdle &rArr; UART0_OutString &rArr; UART0_OutChar
 </UL>
-<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutCRLF
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_ReceiveMessageMCU2
@@ -865,7 +865,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_SendMessageMCU2
 </UL>
 
-<P><STRONG><a name="[9f]"></a>UART0_Init</STRONG> (Thumb, 266 bytes, Stack size 8 bytes, uart0.o(.text.UART0_Init))
+<P><STRONG><a name="[9f]"></a>UART0_Init</STRONG> (Thumb, 264 bytes, Stack size 8 bytes, uart0.o(.text.UART0_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = UART0_Init &rArr; rb0_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb0_Init
@@ -880,7 +880,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_SendMessageMCU2
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_ReceiveMessageMCU2
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -888,11 +888,11 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 4<LI>Call Chain = UART0_OutChar
 </UL>
 <BR>[Called By]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_SendMessageMCU2
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutCRLF
 </UL>
 
-<P><STRONG><a name="[93]"></a>UART0_OutString</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, uart0.o(.text.UART0_OutString))
+<P><STRONG><a name="[94]"></a>UART0_OutString</STRONG> (Thumb, 36 bytes, Stack size 16 bytes, uart0.o(.text.UART0_OutString))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = UART0_OutString &rArr; UART0_OutChar
 </UL>
 <BR>[Calls]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutChar
@@ -901,7 +901,7 @@ Global Symbols
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_ReceiveMessageMCU2
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PrintColorName
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setLed
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -930,7 +930,7 @@ Global Symbols
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[a0]"></a>UART5_Init</STRONG> (Thumb, 282 bytes, Stack size 8 bytes, uart5.o(.text.UART5_Init))
+<P><STRONG><a name="[a0]"></a>UART5_Init</STRONG> (Thumb, 284 bytes, Stack size 8 bytes, uart5.o(.text.UART5_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = UART5_Init &rArr; rb5_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rb5_Init
@@ -960,19 +960,19 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 1018 bytes, Stack size 32 bytes, main.o(.text.main))
+<P><STRONG><a name="[85]"></a>main</STRONG> (Thumb, 1034 bytes, Stack size 32 bytes, main.o(.text.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 100<LI>Call Chain = main &rArr; Mode3_SendMessageMCU2 &rArr; UART0_InChar &rArr; rb0_Get &rArr; rb0_Empty
 </UL>
 <BR>[Calls]<UL><LI><a href="#[95]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_SendMessageMCU2
 <LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Mode3_ReceiveMessageMCU2
 <LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_OutChar
-<LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_Available
 <LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;getColor
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PrintColorName
 <LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setLed
-<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
+<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ResetToIdle
 <LI><a href="#[91]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_InChar
-<LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART5_Available
+<LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutCRLF
 <LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DelayMs
 <LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SystemInit
@@ -1037,7 +1037,7 @@ Global Symbols
 <P><STRONG><a name="[a9]"></a>setLed</STRONG> (Thumb, 202 bytes, Stack size 16 bytes, main.o(.text.setLed))
 <BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = setLed &rArr; UART0_OutString &rArr; UART0_OutChar
 </UL>
-<BR>[Calls]<UL><LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
+<BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;UART0_OutString
 </UL>
 <BR>[Called By]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
