@@ -34,14 +34,21 @@
 #define COLOR_BRIGHT_CYAN    "\033[96m"
 #define COLOR_BRIGHT_WHITE   "\033[97m"
 
-
 void UART_Init(bool RxInt, bool TxInt);
 void OutCRLF(void);
+
 uint8_t UART_InChar(void);
 void UART_OutChar(uint8_t data);
 void UART_OutString(uint8_t *pt);
+
 uint32_t UART_InUDec(void);
 void UART_OutUDec(uint32_t n);
 uint32_t UART_InUHex(void);
 void UART_OutUHex(uint32_t number);
 void UART_InString(uint8_t *bufPt, uint16_t max);
+
+// ring buffer helper API
+bool UART_Available(void);
+
+// ISR
+void UART0_Handler(void);

@@ -1,4 +1,5 @@
 #include "tm4c123gh6pm.h"
+#include "stdint.h"
 
  /*
  Bit postions
@@ -13,9 +14,9 @@ SW1 - G  - B  - R  - SW2
  */
 
 
-// PortF register Mask
+// PortF  Mask
 #define PORTF 0x20
-
+#define PWM 0x02
 
 // Interupt Level
 #define LEVEL2 0x00400000
@@ -30,6 +31,9 @@ SW1 - G  - B  - R  - SW2
 #define YELLOW 0x0A
 #define CYAN 0x0C
 
+// pwm 
+#define PWM_LOAD 49999 
+
 //Switches
 #define SWITCHES 0x11
 
@@ -38,4 +42,4 @@ SW1 - G  - B  - R  - SW2
 
 void PortF_Init(void);
 
-void GPIOPortF_Handler(void);
+void PortF_SetRGB(uint8_t red, uint8_t blue, uint8_t green);
